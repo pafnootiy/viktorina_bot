@@ -19,9 +19,9 @@ import logging
 import os
 
 from dotenv import load_dotenv
+import telegram
 
-
-from telegram import Update, ForceReply
+from telegram import Update, ForceReply, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Enable logging
@@ -40,6 +40,8 @@ load_dotenv()
 
 
 TOKEN = os.getenv('TG_API_TOKEN')
+CHAT_ID = os.getenv('TG_CHAT_ID')
+
 
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
@@ -56,8 +58,17 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 
 def echo(update: Update, context: CallbackContext) -> None:
+
+    bot = telegram.Bot(token=TOKEN)
     """Echo the user message."""
-    update.message.reply_text(update.message.text)
+    # update.message.reply_text(update.message.text)
+    custom_keyboard = [['Новый вопрос', 'Сдаться'],
+                       ['Мой счёт']]
+
+    reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+    bot.send_message(chat_id=CHAT_ID,
+                     text="Custom Keyboard Test",
+                     reply_markup=reply_markup)
 
 
 def main() -> None:
