@@ -118,6 +118,7 @@ def cancel(update: Update, context: CallbackContext):
 
 
 def main() -> None:
+    load_dotenv()
     file_handler = logging.FileHandler('bot.log')
     file_handler.setLevel(logging.INFO)
     formatter = logging.Formatter(
