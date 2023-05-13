@@ -24,11 +24,17 @@ TOKEN = os.getenv('TG_API_TOKEN')
 CHAT_ID = os.getenv('TG_CHAT_ID')
 FILES = 'quiz_questions'
 
-r = redis.Redis(
-    host='redis-12532.c284.us-east1-2.gce.cloud.redislabs.com',
-    port=12532,
-    password=os.getenv("REDIS_PASS"))
+# r = redis.Redis(
+#     host='redis-12532.c284.us-east1-2.gce.cloud.redislabs.com',
+#     port=12532,
+#     password=os.getenv("REDIS_PASS"))
+# r = 'redis://pafnootiy86@gmail.com:Joke4elgin6@@redis-12532.c284.us-east1-2.gce.cloud.redislabs.com:12532'
 
+r = redis.Redis(
+  host='redis-12532.c284.us-east1-2.gce.cloud.redislabs.com',
+  port=12532,
+  password=os.getenv('REDIS_PASS'))
+ 
 
 def create_keyboard():
     custom_keyboard = [['Новый вопрос',
