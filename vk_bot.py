@@ -83,7 +83,7 @@ def check_answer(event, vk_api, user_answer):
         send_messages(event, vk_api, message)
 
 
-def givup(event, vk_api, user_answer):
+def giveup(event, vk_api, user_answer):
 
     message = f"Правильный ответ {user_answer}"
     send_messages(event, vk_api, message)
@@ -107,7 +107,7 @@ def main():
                         user_question, user_answer = ask_question(
                             event, vk_api, redis_pass)
                     elif event.message == 'Сдаться':
-                        givup(event, vk_api, user_answer)
+                        giveup(event, vk_api, user_answer)
                     else:
                         check_answer(event, vk_api, user_answer)
 
