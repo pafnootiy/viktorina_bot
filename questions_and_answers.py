@@ -1,6 +1,6 @@
 import random
 import os
-
+folder_with_files ='quiz_questions'
 
 def get_random_file(folder_with_files):
 
@@ -11,7 +11,7 @@ def get_random_file(folder_with_files):
     with open(path_to_answers_and_questions, "r", encoding='KOI8-R') as file:
         content = list(filter(None, file.read().split('\n\n')))
     return content
-
+ 
 
 def get_question_answer(content):
     all_questions_answers = []
@@ -28,3 +28,6 @@ def get_question_answer(content):
 
             all_questions_answers.append(question_answer)
     return random.choice(all_questions_answers)
+
+
+# print(get_question_answer(content))
