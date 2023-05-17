@@ -7,7 +7,7 @@ from vk_api.exceptions import ApiError
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.utils import get_random_id
-from questions_and_answers import get_question_answer, get_random_file
+from questions_and_answers import QuizBot
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,8 @@ def send_messages(event, vk_api, message):
 
 
 def get_random_question_and_answer(r, folder_with_files):
-    random_question_and_answer = get_question_answer(
-        get_random_file(folder_with_files))
+    quiz_bot = QuizBot(folder_with_files)
+    random_question_and_answer = quiz_bot.get_random_question()
     question = random_question_and_answer['question']
     answer = random_question_and_answer['answer']
     return question, answer

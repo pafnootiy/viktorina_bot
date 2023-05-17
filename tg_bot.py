@@ -1,10 +1,10 @@
 import logging
 import os
 import redis
-import telegram
+
 
 from telegram import Update, ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from questions_and_answers import get_question_answer, get_random_file
+from questions_and_answers import QuizBot
 from dotenv import load_dotenv
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
 
@@ -18,7 +18,6 @@ def create_keyboard():
     custom_keyboard = [['Новый вопрос',
                         'Сдаться'], ['Мой счёт']]
     reply_markup = ReplyKeyboardMarkup(custom_keyboard, one_time_keyboard=True)
-
     return reply_markup
 
 
@@ -38,13 +37,12 @@ def start(update: Update, context: CallbackContext) -> None:
 
 
 def handle_new_question_request(update: Update, context: CallbackContext, FILES: str, r: redis.client.Redis) -> None:
-    random_qustion_and_answer = get_question_answer(
-        get_random_file(FILES))
-
+    quiz_bot = QuizBot(FILES)
+    random_question_and_answer = quiz_bot.get_random_question()
     r.mset(
         {
-            'question': random_qustion_and_answer['question'],
-            'answer': random_qustion_and_answer['answer']
+            'question': random_question_and_answer['question'],
+            'answer': random_question_and_answer['answer']
         }
     )
     user_question = r.get('question').decode(
