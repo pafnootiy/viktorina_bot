@@ -69,27 +69,6 @@ def handle_solution_attempt(update: Update, context: CallbackContext, r: redis.c
 
         return QUESTION
 
-    if user_reply not in ['Новый вопрос', 'Сдаться']:
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text="Неправильно… Попробуйте ещё раз или нажмите «Сдаться»",
-            reply_markup=create_keyboard()
-        )
-
-    return CHECK_ANSWER
-
-
-def handle_solution_attempt(update: Update, context: CallbackContext, r: redis.client.Redis) -> None:
-    user_answer = r.get('answer').decode("utf-8").replace('Ответ:\n', '')
-    user_reply = update.message.text
-
-    if user_reply in user_answer:
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»",
-                                 reply_markup=create_keyboard())
-
-        return QUESTION
-
     if user_reply == 'Сдаться':
         context.bot.send_message(
             chat_id=update.effective_chat.id,
