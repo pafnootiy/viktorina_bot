@@ -1,8 +1,3 @@
-# import random
-# import os
-# folder_with_files = 'quiz_questions'
-
-
 import random
 import os
 

@@ -33,16 +33,15 @@ def send_messages(event, vk_api, message):
     )
 
 
-def get_random_question_and_answer(r, folder_with_files):
-    quiz_bot = QuizBot(folder_with_files)
+def get_random_question_and_answer(quiz_bot):
     random_question_and_answer = quiz_bot.get_random_question()
     question = random_question_and_answer['question']
     answer = random_question_and_answer['answer']
     return question, answer
 
 
-def ask_question(event, vk_api, r, folder_with_files):
-    question, answer = get_random_question_and_answer(r, folder_with_files)
+def ask_question(event, vk_api, r, quiz_bot):
+    question, answer = get_random_question_and_answer(quiz_bot)
     r.set(f'question:{event.peer_id}', question)
     r.set(f'answer:{event.peer_id}', answer)
     message = question.replace("Вопрос \d:", "", 1)
@@ -73,25 +72,26 @@ def main():
     load_dotenv()
     logging.basicConfig(filename='quiz.log', level=logging.DEBUG,
                         format='%(asctime)s:%(levelname)s:%(message)s')
-    VK_TOKEN = os.getenv("VK_TOKEN")
-    REDIS_HOST = os.getenv('REDIS_HOST')
-    REDIS_PASS = os.getenv('REDIS_PASS')
-    REDIS_PORT = os.getenv('REDIS_PORT')
-    FILES = os.getenv("PATH_TO_FILE")
-    vk_session = vk.VkApi(token=VK_TOKEN)
+    vk_token = os.getenv("VK_TOKEN")
+    redis_host = os.getenv('REDIS_HOST')
+    redis_pass = os.getenv('REDIS_PASS')
+    redis_port = os.getenv('REDIS_PORT')
+    files = os.getenv("PATH_TO_FILE")
+    quiz_bot = QuizBot(files)
+    vk_session = vk.VkApi(token=vk_token)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
 
     r = redis.Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        password=REDIS_PASS)
+        host=redis_host,
+        port=redis_port,
+        password=redis_pass)
 
     for event in longpoll.listen():
         try:
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 if event.message == 'Новый вопрос':
-                    ask_question(event, vk_api, r, FILES)
+                    ask_question(event, vk_api, r, quiz_bot)
                 elif event.message == 'Сдаться':
                     give_up(event, vk_api, r)
                 else:

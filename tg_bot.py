@@ -11,7 +11,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 
 logger = logging.getLogger(__name__)
 
-QUESTION, ANSWER, SCORE, CHECK_ANSWER, GIVE_UP = range(5)
+QUESTION, ANSWER, SCORE, GIVE_UP = range(5)
 
 
 def create_keyboard():
@@ -36,8 +36,12 @@ def start(update: Update, context: CallbackContext) -> None:
     return QUESTION
 
 
-def handle_new_question_request(update: Update, context: CallbackContext, FILES: str, r: redis.client.Redis) -> None:
-    quiz_bot = QuizBot(FILES)
+def handle_new_question_request(
+        update: Update,
+        context: CallbackContext,
+        r: redis.client.Redis,
+        quiz_bot: QuizBot) -> None:
+
     random_question_and_answer = quiz_bot.get_random_question()
     r.mset(
         {
@@ -77,22 +81,18 @@ def handle_solution_attempt(update: Update, context: CallbackContext, r: redis.c
         )
         return QUESTION
 
-    if user_reply not in ['Новый вопрос', 'Сдаться']:
+    else:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="Неправильно… Попробуйте ещё раз или нажмите «Сдаться»",
             reply_markup=create_keyboard()
         )
 
-    return CHECK_ANSWER
-
 
 def handle_give_up(update: Update, context: CallbackContext, r: redis.client.Redis) -> int:
     user_answer = r.get('answer').decode("utf-8").replace('Ответ:\n', '')
-    print('test point')
     user_reply = update.message.text
     if user_reply == 'Сдаться':
-        print('test point___1')
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=f"Правильный ответ: {user_answer}",
@@ -113,15 +113,16 @@ def cancel(update: Update, context: CallbackContext):
 def main() -> None:
     load_dotenv()
 
-    TOKEN = os.getenv('TG_API_TOKEN')
-    FILES = os.getenv('PATH_TO_FILE')
-    REDIS_HOST = os.getenv('REDIS_HOST')
-    REDIS_PASS = os.getenv('REDIS_PASS')
-    REDIS_PORT = os.getenv('REDIS_PORT')
+    token = os.getenv('TG_API_TOKEN')
+    files = os.getenv('PATH_TO_FILE')
+    redis_host = os.getenv('REDIS_HOST')
+    redis_pass = os.getenv('REDIS_PASS')
+    redis_port = os.getenv('REDIS_PORT')
     r = redis.Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        password=REDIS_PASS)
+        host=redis_host,
+        port=redis_port,
+        password=redis_pass)
+    quiz_bot = QuizBot(files)
 
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -133,7 +134,7 @@ def main() -> None:
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-    updater = Updater(TOKEN)
+    updater = Updater(token)
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
@@ -144,7 +145,7 @@ def main() -> None:
                     Filters.regex('Новый вопрос'),
                     lambda update,
                     context: handle_new_question_request(
-                        update, context, FILES, r)
+                        update, context, r, quiz_bot)
                 )
             ],
             ANSWER: [
@@ -155,10 +156,6 @@ def main() -> None:
                 MessageHandler(Filters.text,
                                lambda update,
                                context: handle_solution_attempt(update, context, r))
-            ],
-            CHECK_ANSWER: [
-                MessageHandler(Filters.text,
-                               lambda update, context: handle_solution_attempt(update, context, r))
             ],
             GIVE_UP: [
                 MessageHandler(Filters.regex('Сдаться'),
