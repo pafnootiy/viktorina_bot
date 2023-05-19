@@ -11,8 +11,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 
 logger = logging.getLogger(__name__)
 
-QUESTION, ANSWER, SCORE, GIVE_UP = range(5)
-
+QUESTION, ANSWER, SCORE, GIVE_UP = range(4)
 
 def create_keyboard():
     custom_keyboard = [['Новый вопрос',
