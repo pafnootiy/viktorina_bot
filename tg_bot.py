@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 QUESTION, ANSWER, SCORE, GIVE_UP = range(4)
 
+
 def create_keyboard():
     custom_keyboard = [['Новый вопрос',
                         'Сдаться'], ['Мой счёт']]
@@ -70,14 +71,6 @@ def handle_solution_attempt(update: Update, context: CallbackContext, r: redis.c
                                  text="Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»",
                                  reply_markup=create_keyboard())
 
-        return QUESTION
-
-    if user_reply == 'Сдаться':
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"Правильный ответ: {user_answer}",
-            reply_markup=create_keyboard()
-        )
         return QUESTION
 
     else:
